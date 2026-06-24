@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор заполнения лотка</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f2f7fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 780px;
+            width: 100%;
+            background: #fff;
+            border-radius: 28px;
+            padding: 30px 35px 40px;
+            box-shadow: 0 8px 30px rgba(0, 20, 40, 0.10);
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0b3b5c;
+            margin-bottom: 4px;
+        }
+        .sub {
+            color: #4a6a7a;
+            font-size: 0.95rem;
+            border-bottom: 2px solid #e6edf5;
+            padding-bottom: 14px;
+            margin-bottom: 22px;
+        }
+        .params {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px 25px;
+            background: #f8fcff;
+            padding: 18px 20px;
+            border-radius: 16px;
+            border: 1px solid #dde8f2;
+            margin-bottom: 24px;
+        }
+        .field {
+            flex: 1 1 140px;
+            min-width: 110px;
+        }
+        .field label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1a4a6a;
+            margin-bottom: 4px;
+        }
+        .field input, .field select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #cbdae6;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: #fff;
+            transition: 0.2s;
+        }
+        .field input:focus, .field select:focus {
+            border-color: #1a7a9a;
+            outline: none;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid #dde8f2;
+            margin: 8px 0 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            min-width: 350px;
+        }
+        th {
+            background: #eaf1f9;
+            color: #0b3b5c;
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 600;
+            border-bottom: 2px solid #cbdae6;
+        }
+        td {
+            padding: 8px 10px;
+            text-align: center;
+            border-bottom: 1px solid #e2eaf2;
+            vertical-align: middle;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        td input {
+            width: 90px;
+            padding: 7px 6px;
+            border: 2px solid #cbdae6;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            text-align: center;
+            background: #fff;
+            transition: 0.2s;
+        }
+        td input:focus {
+            border-color: #1a7a9a;
+            outline: none;
+        }
+        .btn-remove {
+            background: #e74c4c;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-remove:hover {
+            background: #c0392b;
+        }
+        .btn-add {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            padding: 8px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 6px;
+        }
+        .btn-add:hover {
+            background: #1e8449;
+        }
+        .btn-calc {
+            background: #1a7a9a;
+            color: #fff;
+            border: none;
+            padding: 9px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 80, 120, 0.15);
+            margin-left: 12px;
+        }
+        .btn-calc:hover {
+            background: #0e5f7a;
+        }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin: 14px 0 18px;
+        }
+
+        .result-box {
+            background: #eef6fe;
+            border-radius: 18px;
+            padding: 20px 24px;
+            border: 1px solid #cde0f0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 28px;
+            align-items: baseline;
+            margin-top: 6px;
+        }
+        .res-item {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+            font-size: 0.95rem;
+            color: #1a3a4a;
+        }
+        .res-item .val {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #005b8c;
+        }
+        .status {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-left: auto;
+        }
+        .status.ok { color: #27ae60; }
+        .status.over { color: #e74c4c; }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #5a7a8a;
+            text-align: center;
+            border-top: 1px solid #e2eaf2;
+            padding-top: 14px;
+        }
+        .footer a {
+            color: #1a7a9a;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px 16px; }
+            .params { flex-direction: column; }
+            .field { flex: 1 1 auto; }
+            .result-box { flex-direction: column; align-items: stretch; }
+            .status { margin-left: 0; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .btn-calc { margin-left: 0; }
+        }
+        @media (max-width: 480px) {
+            td input { width: 70px; padding: 5px 4px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📐 Калькулятор заполнения лотка</h1>
+    <div class="sub">Разработал Никитин А.Ю</div>
+
+    <!-- Параметры лотка -->
+    <div class="params">
+        <div class="field">
+            <label for="width">Ширина В (мм)</label>
+            <input type="number" id="width" value="100" step="1" min="10">
+        </div>
+        <div class="field">
+            <label for="height">Высота Н (мм)</label>
+            <input type="number" id="height" value="100" step="1" min="10">
+        </div>
+        <div class="field">
+            <label for="type">Тип конструкции</label>
+            <select id="type">
+                <option value="0.40">С открываемой крышкой (40%)</option>
+                <option value="0.35">Глухой короб (35%)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Таблица кабелей -->
+    <div style="margin: 4px 0 6px; font-weight: 600; color: #0b3b5c;">Кабели:</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Диаметр D (мм)</th>
+                    <th>Количество, шт</th>
+                    <th style="width:70px;">Действие</th>
+                </tr>
+            </thead>
+            <tbody id="cableRows">
+                <!-- строки генерируются JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="actions">
+        <button class="btn-add" id="addRowBtn">➕ Добавить кабель</button>
+        <button class="btn-calc" id="calcBtn">Рассчитать</button>
+    </div>
+
+    <!-- Результаты -->
+    <div class="result-box" id="resultBox">
+        <div class="res-item"><span>Полезная площадь:</span> <span class="val" id="resSuse">--</span> мм²</div>
+        <div class="res-item"><span>Допустимая площадь:</span> <span class="val" id="resSdop">--</span> мм²</div>
+        <div class="res-item"><span>Суммарная площадь кабелей:</span> <span class="val" id="resSum">--</span> мм²</div>
+        <div class="res-item"><span>Заполнение:</span> <span class="val" id="resPercent">--</span> %</div>
+        <div class="status" id="statusMsg">—</div>
+    </div>
+
+    <div class="footer">
+        Нормы заполнения по <a href="https://www.elec.ru/library/direction/pue/razdel-2-1-4.html" target="_blank">ПУЭ 7, п.2.1.61</a>.
+        Коэффициент 0.95 учтён в полезной площади.
+    </div>
+</div>
+
+<script>
+    (function() {
+        const widthEl = document.getElementById('width');
+        const heightEl = document.getElementById('height');
+        const typeEl = document.getElementById('type');
+        const calcBtn = document.getElementById('calcBtn');
+        const addRowBtn = document.getElementById('addRowBtn');
+        const tbody = document.getElementById('cableRows');
+
+        const resSuse = document.getElementById('resSuse');
+        const resSdop = document.getElementById('resSdop');
+        const resSum = document.getElementById('resSum');
+        const resPercent = document.getElementById('resPercent');
+        const statusMsg = document.getElementById('statusMsg');
+
+        let rowCounter = 0;
+
+        // Создание строки
+        function createRow(diameter = 3, quantity = 1) {
+            const tr = document.createElement('tr');
+            tr.dataset.rowId = rowCounter++;
+
+            const tdDiam = document.createElement('td');
+            const inputDiam = document.createElement('input');
+            inputDiam.type = 'number';
+            inputDiam.step = '0.1';
+            inputDiam.min = '0.5';
+            inputDiam.value = diameter;
+            inputDiam.className = 'diam-input';
+            tdDiam.appendChild(inputDiam);
+
+            const tdQty = document.createElement('td');
+            const inputQty = document.createElement('input');
+            inputQty.type = 'number';
+            inputQty.step = '1';
+            inputQty.min = '1';
+            inputQty.value = quantity;
+            inputQty.className = 'qty-input';
+            tdQty.appendChild(inputQty);
+
+            const tdAction = document.createElement('td');
+            const btnRemove = document.createElement('button');
+            btnRemove.textContent = '✕';
+            btnRemove.className = 'btn-remove';
+            btnRemove.addEventListener('click', function() {
+                if (tbody.children.length > 1) {
+                    tr.remove();
+                    calculate();
+                } else {
+                    alert('Должна остаться хотя бы одна строка.');
+                }
+            });
+            tdAction.appendChild(btnRemove);
+
+            tr.appendChild(tdDiam);
+            tr.appendChild(tdQty);
+            tr.appendChild(tdAction);
+
+            // Пересчёт при изменении
+            inputDiam.addEventListener('input', calculate);
+            inputQty.addEventListener('input', calculate);
+
+            return tr;
+        }
+
+        function addRow(diameter, quantity) {
+            const tr = createRow(diameter, quantity);
+            tbody.appendChild(tr);
+            calculate();
+        }
+
+        // Основной расчёт
+        function calculate() {
+            const W = parseFloat(widthEl.value) || 0;
+            const H = parseFloat(heightEl.value) || 0;
+            const n = parseFloat(typeEl.value) || 0.40;
+
+            if (W <= 0 || H <= 0) {
+                resSuse.textContent = '—';
+                resSdop.textContent = '—';
+                resSum.textContent = '—';
+                resPercent.textContent = '—';
+                statusMsg.textContent = 'Задайте размеры лотка';
+                statusMsg.className = 'status';
+                return;
+            }
+
+            const Suse = 0.95 * W * H;
+            const Sdop = Suse * n;
+
+            // Сбор данных
+            const rows = tbody.querySelectorAll('tr');
+            let totalArea = 0;
+            let hasError = false;
+
+            rows.forEach(tr => {
+                const diamInput = tr.querySelector('.diam-input');
+                const qtyInput = tr.querySelector('.qty-input');
+                const D = parseFloat(diamInput.value);
+                const qty = parseInt(qtyInput.value, 10);
+                if (!isNaN(D) && D > 0 && !isNaN(qty) && qty > 0) {
+                    const areaOne = Math.PI * Math.pow(D / 2, 2);
+                    totalArea += areaOne * qty;
+                    diamInput.classList.remove('error');
+                    qtyInput.classList.remove('error');
+                } else {
+                    hasError = true;
+                    if (isNaN(D) || D <= 0) diamInput.classList.add('error');
+                    else diamInput.classList.remove('error');
+                    if (isNaN(qty) || qty <= 0) qtyInput.classList.add('error');
+                    else qtyInput.classList.remove('error');
+                }
+            });
+
+            if (hasError) {
+                resSum.textContent = 'Ошибка в данных';
+                resPercent.textContent = '—';
+                statusMsg.textContent = '❌ Проверьте выделенные поля';
+                statusMsg.className = 'status over';
+                return;
+            }
+
+            const percent = (totalArea / Sdop) * 100;
+
+            resSuse.textContent = Suse.toFixed(1);
+            resSdop.textContent = Sdop.toFixed(1);
+            resSum.textContent = totalArea.toFixed(2);
+            resPercent.textContent = percent.toFixed(1);
+
+            if (percent <= 100) {
+                statusMsg.textContent = '✅ Заполнение в норме';
+                statusMsg.className = 'status ok';
+            } else {
+                statusMsg.textContent = '❌ Превышение допустимой площади!';
+                statusMsg.className = 'status over';
+            }
+        }
+
+        // Инициализация: одна строка
+        function init() {
+            tbody.innerHTML = '';
+            addRow(3, 1);
+        }
+
+        // События
+        calcBtn.addEventListener('click', calculate);
+        addRowBtn.addEventListener('click', function() {
+            addRow(3, 1);
+        });
+
+        widthEl.addEventListener('input', calculate);
+        heightEl.addEventListener('input', calculate);
+        typeEl.addEventListener('change', calculate);
+
+        // Запуск
+        init();
+        calculate();
+
+        // Добавим стиль для ошибок (если не задан)
+        const style = document.createElement('style');
+        style.textContent = `
+            td input.error {
+                border-color: #e74c4c;
+                background: #fff5f5;
+            }
+        `;
+        document.head.appendChild(style);
+    })();
+</script>
+</body>
+</html>
